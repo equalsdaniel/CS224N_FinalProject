@@ -222,7 +222,7 @@ class BertModel(BertPreTrainedModel):
     #CGU from Junyang Lin et al., 2018
     self.relu = nn.ReLU()
     self.cgu_att = BertSelfAttention(config)
-    self.cnn = nn.Conv1d(8, 60, 768, padding=0, bias=True)
+    self.cnn = nn.Conv1d(60, 60, 2, padding=0, bias=True)
 
 
 
