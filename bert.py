@@ -222,8 +222,10 @@ class BertModel(BertPreTrainedModel):
     #CGU from Junyang Lin et al., 2018
     self.relu = nn.ReLU()
     self.cgu_att = BertSelfAttention(config)
+
     #just using 20 as place holder, resize in forward_with_CGU
     self.cnn = nn.Conv1d(20, 20, 2, padding=0, bias=True)
+
 
 
 
