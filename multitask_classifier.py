@@ -85,9 +85,9 @@ class MultitaskBERT(nn.Module):
 
         #self.classifier = BertSentimentClassifier(config)
 
-        self.relu = nn.ReLU()
-        self.cgu_att = BertSelfAttention(config)
-        self.post_embed_cnn = nn.Conv1d(embed_size, embed_size, 2, padding='same')
+        # self.relu = nn.ReLU()
+        # self.cgu_att = BertSelfAttention(config)
+        # self.post_embed_cnn = nn.Conv1d(embed_size, embed_size, 2, padding='same')
 
 
         #self.classifier = BertSentimentClassifier(config)
