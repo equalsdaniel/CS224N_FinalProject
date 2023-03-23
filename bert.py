@@ -278,7 +278,7 @@ class BertModel(BertPreTrainedModel):
       # feed the encoding from the last bert_layer to the next
       hidden_states = layer_module(hidden_states, extended_attention_mask)
 
-    return hidden_states
+    return hidden_states.to(self.device)
 
   def forward_without_CGU(self, input_ids, attention_mask):
     """
@@ -307,10 +307,10 @@ class BertModel(BertPreTrainedModel):
     embedding_output = self.embed(input_ids=input_ids)
 
     # feed to a transformer (a stack of BertLayers)
-    sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
+    sequence_output = self.encode(embedding_output, attention_mask=attention_mask).to(self.device)
 
     #CGU:
-    self.weights = sequence_output.size(1).to(self.device)
+    self.weights = sequence_output.size(1)
     self.cnn = nn.Conv1d(in_channels = sequence_output.size(1), out_channels = self.weights, kernel_size = 2, padding=0, bias=True)
     x = self.cnn(sequence_output)
     unit = self.relu(x)
