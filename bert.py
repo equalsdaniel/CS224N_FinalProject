@@ -315,7 +315,7 @@ class BertModel(BertPreTrainedModel):
     #CGU:
     self.cnn = nn.Conv1d(sequence_output.size(1), sequence_output.size(1), 2, padding=0, bias=True)
     x = self.cnn(sequence_output)
-    unit = self.relu(sequence_output)
+    unit = self.relu(x)
     extended_attention_mask: torch.Tensor = get_extended_attention_mask(attention_mask, self.dtype)
     unit = self.cgu_att.forward(unit, extended_attention_mask)
 
