@@ -16,6 +16,7 @@ from dfp_datasets import SentenceClassificationDataset, SentencePairDataset, \
 from dfp_utils import get_extended_attention_mask
 
 from evaluation import model_eval_sst, test_model_multitask
+from long import test_model_laysum
 
 TQDM_DISABLE=True
 
@@ -350,4 +351,5 @@ if __name__ == "__main__":
     seed_everything(args.seed)  # fix the seed for reproducibility
     train_multitask(args)
     test_model(args)
+    # test_model_laysum(args)
     print("Total time with CGU: {:.2f}s".format(time.time() - start))

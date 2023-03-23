@@ -1,38 +1,11 @@
-# import time, random, numpy as np, argparse, sys, re, os
-# from types import SimpleNamespace
-#
-# import torch
-# from torch import nn
-# import torch.nn.functional as F
-# from torch.utils.data import DataLoader
-#
-# from bert import BertModel
-# from classifier import BertSentimentClassifier, SentimentDataset
-# from optimizer import AdamW
-# from tqdm import tqdm
 
-from dfp_datasets import load_multitask_data, load_multitask_test_data
 
 # BertModel max seq len is 512: from tokenizer.py,
 # PRETRAINED_POSITIONAL_EMBEDDINGS_SIZES = {
 #     "bert-base-uncased": 512
 # }
 
-"""
-1. Find better dataset if possible so don't have to config 
-    - for if we don't want to truncate: https://huggingface.co/datasets/scientific_papers/viewer/pubmed/train
-    - if we're cool truncating
-    
-2. Set up model using miniBERT embeds
-3. make rouge scoring func
 
-can we change other stuff in classifier? if yea, add a load state dict for model from .pt to line 267
-
-Preproccess
-    - First try truncating
-    - If doesn't work, split into paragraphs of <= 512 tokens and apply again if need
-    
-"""
 # from datasets import load_dataset
 #
 # data = load_dataset('tomasg25/scientific_lay_summarisation')
@@ -43,10 +16,11 @@ import pandas as pd
 import csv
 import ast
 import torch
-from dfp_datasets import SentencePairDataset, SentenceClassificationDataset, SentenceClassificationTestDataset
+from dfp_datasets import SentencePairDataset, SentenceClassificationDataset, SentenceClassificationTestDataset, SentencePairTestDataset
 from multitask_classifier import save_model, train_multitask, MultitaskBERT, get_args, seed_everything
-from evaluation import model_eval_sst, test_model_multitask
+from evaluation import model_eval_sst, test_model_multitask, model_eval_test_multitask, model_eval_multitask
 from torch.utils.data import DataLoader
+
 
 
 def get_laysum():
@@ -87,38 +61,31 @@ def test_laysum_multitask(args, model, device):
     test_sent_data = SentenceClassificationTestDataset(test_sent_data, args)
     dev_sent_data = SentenceClassificationDataset(dev_sent_data, args)
 
-    sst_test_dataloader = DataLoader(sst_test_data, shuffle=True, batch_size=args.batch_size,
-                                     collate_fn=sst_test_data.collate_fn)
-    sst_dev_dataloader = DataLoader(sst_dev_data, shuffle=False, batch_size=args.batch_size,
-                                    collate_fn=sst_dev_data.collate_fn)
+    test_pair_data = SentencePairTestDataset(test_pair_data, args)
+    dev_pair_data = SentencePairDataset(dev_pair_data, args)
 
-    para_test_data = SentencePairTestDataset(para_test_data, args)
-    para_dev_data = SentencePairDataset(para_dev_data, args)
+    test_sent_dataloader = DataLoader(test_sent_data, shuffle=True, batch_size=args.batch_size,
+                                     collate_fn=test_sent_data.collate_fn)
+    dev_sent_dataloader = DataLoader(dev_sent_data, shuffle=False, batch_size=args.batch_size,
+                                collate_fn=dev_sent_data.collate_fn)
 
-    para_test_dataloader = DataLoader(para_test_data, shuffle=True, batch_size=args.batch_size,
-                                      collate_fn=para_test_data.collate_fn)
-    para_dev_dataloader = DataLoader(para_dev_data, shuffle=False, batch_size=args.batch_size,
-                                     collate_fn=para_dev_data.collate_fn)
+    test_pair_dataloader = DataLoader(test_pair_data, shuffle=True, batch_size=args.batch_size,
+                                      collate_fn=test_pair_data.collate_fn)
+    dev_pair_dataloader = DataLoader(dev_pair_data, shuffle=False, batch_size=args.batch_size,
+                                 collate_fn=dev_pair_data.collate_fn)
 
-    sts_test_data = SentencePairTestDataset(sts_test_data, args)
-    sts_dev_data = SentencePairDataset(sts_dev_data, args, isRegression=True)
 
-    sts_test_dataloader = DataLoader(sts_test_data, shuffle=True, batch_size=args.batch_size,
-                                     collate_fn=sts_test_data.collate_fn)
-    sts_dev_dataloader = DataLoader(sts_dev_data, shuffle=False, batch_size=args.batch_size,
-                                    collate_fn=sts_dev_data.collate_fn)
+    dev_paraphrase_accuracy, dev_para_y_pred, dev_ids, \
+        dev_sentiment_accuracy, dev_sst_y_pred, dev_ids, dev_sts_corr, \
+        dev_sts_y_pred, dev_ids = model_eval_multitask(dev_sent_dataloader,
+                                                       dev_pair_dataloader,
+                                                       dev_pair_dataloader, model, device)
 
-    dev_paraphrase_accuracy, dev_para_y_pred, dev_para_sent_ids, \
-        dev_sentiment_accuracy,dev_sst_y_pred, dev_sst_sent_ids, dev_sts_corr, \
-        dev_sts_y_pred, dev_sts_sent_ids = model_eval_multitask(sst_dev_dataloader,
-                                                                para_dev_dataloader,
-                                                                sts_dev_dataloader, model, device)
-
-    test_para_y_pred, test_para_sent_ids, test_sst_y_pred, \
-        test_sst_sent_ids, test_sts_y_pred, test_sts_sent_ids = \
-        model_eval_test_multitask(sst_test_dataloader,
-                                  para_test_dataloader,
-                                  sts_test_dataloader, model, device)
+    test_para_y_pred, test_ids, test_sst_y_pred, \
+        test_ids, test_sts_y_pred, test_ids = \
+        model_eval_test_multitask(test_sent_dataloader,
+                                  test_pair_dataloader,
+                                  test_pair_dataloader, model, device)
 
     with open(args.sst_dev_out, "w+") as f:
         print(f"dev sentiment acc :: {dev_sentiment_accuracy :.3f}")
@@ -165,7 +132,7 @@ def test_model_laysum(args):
         model = model.to(device)
         print(f"Loaded model to test from {args.filepath}")
 
-        test_model_multitask(args, model, device)
+        test_laysum_multitask(args, model, device)
 
 
 
