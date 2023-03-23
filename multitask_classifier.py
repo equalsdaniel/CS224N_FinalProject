@@ -17,9 +17,6 @@ from dfp_utils import get_extended_attention_mask
 
 from evaluation import model_eval_sst, test_model_multitask
 
-#from transformer.Models import Decoder
-
-
 TQDM_DISABLE=True
 
 # fix the random seed
