@@ -34,9 +34,12 @@ Preproccess
     
 """
 # from datasets import load_dataset
-# from charset_normalizer import md__mypyc
 #
 # data = load_dataset('tomasg25/scientific_lay_summarisation')
 # print(data)
 
-#%%
+import pandas as pd
+
+df = pd.read_json('laysum_dummy_data/elife_ds1/test.json')
+ds = df.to_csv()
+print(ds)

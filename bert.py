@@ -221,10 +221,6 @@ class BertModel(BertPreTrainedModel):
     #CGU from Junyang Lin et al., 2018
     self.relu = nn.ReLU()
     self.cgu_att = BertSelfAttention(config)
-    #just using 20 as place holder, resize in forward_with_CGU
-    self.cnn = 0
-
-    #print(input_ids)
 
     self.init_weights()
 
@@ -308,12 +304,9 @@ class BertModel(BertPreTrainedModel):
     embedding_output = self.embed(input_ids=input_ids)
 
     # feed to a transformer (a stack of BertLayers)
-    sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
+    sequence_output = self.encode(embedding_output, attention_mask=attention_mask).type(torch.cuda.FloatTensor)
 
     #CGU:
-    self.cnn = nn.Conv1d(input_ids.size(1), input_ids.size(1), 2, padding=0, bias=True)
-    self.init_weights()
-    x = self.cnn(sequence_output)
     unit = self.relu(sequence_output)
     extended_attention_mask: torch.Tensor = get_extended_attention_mask(attention_mask, self.dtype)
     unit = self.cgu_att.forward(unit, extended_attention_mask)
