@@ -310,8 +310,8 @@ class BertModel(BertPreTrainedModel):
     sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
 
     #CGU:
-    self.weights = sequence_output.size(1)
-    self.cnn = nn.Conv1d(sequence_output.size(1), self.weights, 2, padding=0, bias=True)
+    self.weights = sequence_output.size(1).to(self.device)
+    self.cnn = nn.Conv1d(in_channels = sequence_output.size(1), out_channels = self.weights, kernel_size = 2, padding=0, bias=True)
     x = self.cnn(sequence_output)
     unit = self.relu(x)
     extended_attention_mask: torch.Tensor = get_extended_attention_mask(attention_mask, self.dtype)
