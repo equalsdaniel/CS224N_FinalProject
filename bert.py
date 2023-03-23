@@ -189,7 +189,6 @@ class BertLayer(nn.Module):
     #raise NotImplementedError
 
 
-
 class BertModel(BertPreTrainedModel):
   """
   the bert model returns the final embeddings for each token in a sentence
@@ -223,10 +222,8 @@ class BertModel(BertPreTrainedModel):
     self.relu = nn.ReLU()
     self.cgu_att = BertSelfAttention(config)
 
-    #just using 20 as place holder, resize in forward_with_CGU
-    # self.cnn = nn.Conv1d(20, 20, 2, padding=0, bias=True)
-
     self.init_weights()
+
 
   def embed(self, input_ids):
     input_shape = input_ids.size()
@@ -310,10 +307,7 @@ class BertModel(BertPreTrainedModel):
     sequence_output = self.encode(embedding_output, attention_mask=attention_mask).type(torch.cuda.FloatTensor)
 
     #CGU:
-    # self.weights = sequence_output.size(1).type(torch.cuda.FloatTensor)
-    self.cnn = nn.Conv1d(in_channels = sequence_output.size(1), out_channels = sequence_output.size(1), kernel_size = 2, padding=0, bias=True)
-    x = self.cnn(sequence_output)
-    unit = self.relu(x)
+    unit = self.relu(sequence_output)
     extended_attention_mask: torch.Tensor = get_extended_attention_mask(attention_mask, self.dtype)
     unit = self.cgu_att.forward(unit, extended_attention_mask)
 
@@ -440,3 +434,7 @@ class Transformer(nn.Module):
 
     return seq_logit.view(-1, seq_logit.size(2))
     """
+
+#%%
+
+
