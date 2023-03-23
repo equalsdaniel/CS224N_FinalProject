@@ -226,9 +226,6 @@ class BertModel(BertPreTrainedModel):
     #just using 20 as place holder, resize in forward_with_CGU
     self.cnn = nn.Conv1d(20, 20, 2, padding=0, bias=True)
 
-
-
-
     self.init_weights()
 
   def embed(self, input_ids):
@@ -313,7 +310,8 @@ class BertModel(BertPreTrainedModel):
     sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
 
     #CGU:
-    self.cnn = nn.Conv1d(sequence_output.size(1), sequence_output.size(1), 2, padding=0, bias=True)
+    self.weights = sequence_output.size(1)
+    self.cnn = nn.Conv1d(sequence_output.size(1), self.weights, 2, padding=0, bias=True)
     x = self.cnn(sequence_output)
     unit = self.relu(x)
     extended_attention_mask: torch.Tensor = get_extended_attention_mask(attention_mask, self.dtype)
