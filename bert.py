@@ -278,7 +278,7 @@ class BertModel(BertPreTrainedModel):
       # feed the encoding from the last bert_layer to the next
       hidden_states = layer_module(hidden_states, extended_attention_mask)
 
-    return hidden_states.to(self.device)
+    return hidden_states
 
   def forward_without_CGU(self, input_ids, attention_mask):
     """
