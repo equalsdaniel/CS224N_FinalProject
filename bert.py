@@ -307,10 +307,10 @@ class BertModel(BertPreTrainedModel):
     embedding_output = self.embed(input_ids=input_ids)
 
     # feed to a transformer (a stack of BertLayers)
-    sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
+    sequence_output = self.encode(embedding_output, attention_mask=attention_mask).type(torch.cuda.FloatTensor)
 
     #CGU:
-    self.weights = sequence_output.size(1).type(torch.cuda.FloatTensor)
+    # self.weights = sequence_output.size(1).type(torch.cuda.FloatTensor)
     self.cnn = nn.Conv1d(in_channels = sequence_output.size(1), out_channels = self.weights, kernel_size = 2, padding=0, bias=True)
     x = self.cnn(sequence_output)
     unit = self.relu(x)
