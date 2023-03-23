@@ -227,6 +227,7 @@ class BertModel(BertPreTrainedModel):
     self.cnn = nn.Conv1d(20, 20, 2, padding=0, bias=True)
 
     self.init_weights()
+    self.device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
 
   def embed(self, input_ids):
     input_shape = input_ids.size()
