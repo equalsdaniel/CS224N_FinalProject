@@ -227,7 +227,6 @@ class BertModel(BertPreTrainedModel):
     self.cnn = nn.Conv1d(20, 20, 2, padding=0, bias=True)
 
     self.init_weights()
-    self.device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
 
   def embed(self, input_ids):
     input_shape = input_ids.size()
@@ -311,7 +310,7 @@ class BertModel(BertPreTrainedModel):
     sequence_output = self.encode(embedding_output, attention_mask=attention_mask).to(self.device)
 
     #CGU:
-    self.weights = sequence_output.size(1)
+    self.weights = sequence_output.size(1).type(torch.cuda.FloatTensor)
     self.cnn = nn.Conv1d(in_channels = sequence_output.size(1), out_channels = self.weights, kernel_size = 2, padding=0, bias=True)
     x = self.cnn(sequence_output)
     unit = self.relu(x)
