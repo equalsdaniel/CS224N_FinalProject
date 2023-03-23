@@ -307,7 +307,7 @@ class BertModel(BertPreTrainedModel):
     embedding_output = self.embed(input_ids=input_ids)
 
     # feed to a transformer (a stack of BertLayers)
-    sequence_output = self.encode(embedding_output, attention_mask=attention_mask).to(self.device)
+    sequence_output = self.encode(embedding_output, attention_mask=attention_mask)
 
     #CGU:
     self.weights = sequence_output.size(1).type(torch.cuda.FloatTensor)
